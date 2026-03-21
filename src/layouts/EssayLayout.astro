@@ -1,0 +1,64 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import '../styles/typography.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  publishDate: Date;
+  tags: string[];
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { title, description, publishDate, tags, headings } = Astro.props;
+const dateStr = publishDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase();
+---
+<BaseLayout title={title} description={description}>
+  <div class="page-wrapper">
+    <aside>
+      <Nav />
+    </aside>
+    <main class="page-content">
+      <article>
+        <header style="margin-bottom: 2rem;">
+          <h1>{title}</h1>
+          {description && <h4 style="font-weight: 400; font-style: italic; color: var(--color-muted); margin-top: 0.5rem;">{description}</h4>}
+          <p class="meta" style="margin-top: 0.75rem;">
+            PUBLISHED {dateStr} · {tags.map(t => <span class="tag">{t}</span>)}
+          </p>
+        </header>
+        <div class="essay-content">
+          <slot />
+        </div>
+      </article>
+      <Footer />
+    </main>
+    {headings.length > 0 && (
+      <aside class="toc-sidebar">
+        <TableOfContents headings={headings} />
+      </aside>
+    )}
+  </div>
+  <style>
+    @media (min-width: 1100px) {
+      .page-wrapper {
+        grid-template-columns: 180px 1fr 180px;
+        max-width: 1100px;
+      }
+    }
+    .toc-sidebar {
+      display: none;
+    }
+    @media (min-width: 1100px) {
+      .toc-sidebar {
+        display: block;
+        position: sticky;
+        top: 3rem;
+        align-self: start;
+      }
+    }
+  </style>
+</BaseLayout>

@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=Source+Sans+3:wght@400;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.essay-content {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.essay-content h1,
+.essay-content h2,
+.essay-content h3 {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.essay-content a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

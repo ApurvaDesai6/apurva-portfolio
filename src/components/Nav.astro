@@ -1,0 +1,98 @@
+---
+const navLinks = [
+  { href: '/', label: 'About' },
+  { href: '/essays', label: 'Essays' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/books', label: 'Books', comingSoon: true },
+  { href: '/links', label: 'Links', comingSoon: true },
+  { href: '/curriculum', label: 'Curriculum', comingSoon: true },
+];
+const { pathname } = Astro.url;
+---
+<nav class="site-nav">
+  <a href="/" class="site-name">Apurva Desai</a>
+  <ul>
+    {navLinks.map(link => (
+      <li>
+        {link.comingSoon ? (
+          <span class="nav-link coming-soon">{link.label} *</span>
+        ) : (
+          <a
+            href={link.href}
+            class:list={['nav-link', { active: pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href)) }]}
+          >
+            {link.label}
+          </a>
+        )}
+      </li>
+    ))}
+  </ul>
+  <p class="nav-footnote">* Coming soon</p>
+</nav>
+
+<style>
+  .site-nav {
+    position: sticky;
+    top: 3rem;
+  }
+  .site-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+  .site-name:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    margin-bottom: 0.4rem;
+  }
+  .nav-link {
+    color: var(--color-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.15s;
+  }
+  .nav-link:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .nav-link.active {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .coming-soon {
+    color: var(--color-coming-soon);
+    cursor: default;
+    font-style: italic;
+  }
+  .nav-footnote {
+    font-size: 0.7rem;
+    color: var(--color-coming-soon);
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+  @media (max-width: 700px) {
+    .site-nav {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+    .site-name { margin-bottom: 0; margin-right: auto; width: 100%; }
+    ul { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .nav-footnote { display: none; }
+  }
+</style>

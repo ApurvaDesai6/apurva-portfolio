@@ -1,0 +1,31 @@
+---
+const LAUNCH_DATE = new Date('2026-04-01');
+const now = new Date();
+const years = ((now.getTime() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(2);
+---
+<footer class="site-footer">
+  <hr />
+  <p>Crafted by <a href="mailto:apurvad@umich.edu">Apurva</a> for <span id="site-age">{years}</span> years</p>
+</footer>
+
+<script>
+  const launch = new Date('2026-04-01');
+  function updateAge() {
+    const y = ((Date.now() - launch.getTime()) / (1000*60*60*24*365.25)).toFixed(2);
+    const el = document.getElementById('site-age');
+    if (el) el.textContent = y;
+  }
+  updateAge();
+  setInterval(updateAge, 60000);
+</script>
+
+<style>
+  .site-footer {
+    margin-top: 4rem;
+    padding-bottom: 2rem;
+  }
+  .site-footer p {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+</style>

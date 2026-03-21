@@ -1,0 +1,116 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import PolaroidGrid from '../components/PolaroidGrid.astro';
+---
+<PageLayout title="About">
+  <p class="tagline">YOU'RE GONNA CARRY THAT WEIGHT</p>
+
+  <PolaroidGrid />
+
+  <div class="f1-section">
+    <div class="f1-car-wrapper" id="f1-car-container" style="position: relative;">
+      <!-- F1 car SVG from svgrepo.com (CC0 public domain) - simplified side view -->
+      <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" class="f1-car" style="width: 100%;">
+        <!-- Body -->
+        <path d="M40,55 L60,55 L70,40 L90,35 L140,32 L160,35 L180,38 L220,42 L250,48 L260,55 L40,55 Z" fill="#CC0000" class="f1-body" data-tip="Monocoque chassis. Carbon fiber survival cell rated to withstand 15G impacts."/>
+        <!-- Nose -->
+        <path d="M20,55 L40,55 L40,50 L25,52 Z" fill="#CC0000" class="f1-nose" data-tip="Nose cone. Crumple zone absorbs energy in frontal impacts. Houses S-duct inlet."/>
+        <!-- Cockpit -->
+        <ellipse cx="145" cy="38" rx="20" ry="8" fill="#1a1a1a" class="f1-cockpit" data-tip="Cockpit. Driver sits in a custom molded seat. Steering wheel costs ~$50,000."/>
+        <!-- Halo -->
+        <path d="M130,35 Q145,28 160,35" stroke="#888" stroke-width="3" fill="none" class="f1-halo" data-tip="Halo device. Titanium. Withstands the weight of a London double-decker bus. Mandatory since 2018."/>
+        <!-- Front wing -->
+        <rect x="10" y="53" width="35" height="3" rx="1" fill="#CC0000" class="f1-front-wing" data-tip="Front wing. Generates ~25% of total downforce. Endplates manage tire wake."/>
+        <!-- Rear wing -->
+        <rect x="245" y="42" width="40" height="4" rx="1" fill="#CC0000" class="f1-rear-wing" data-tip="Rear wing. DRS flap opens here for 12-15 km/h speed boost on straights."/>
+        <rect x="260" y="38" width="4" height="18" rx="1" fill="#1a1a1a"/>
+        <!-- Sidepod -->
+        <path d="M160,40 L200,44 L200,55 L160,55 Z" fill="#990000" class="f1-sidepod" data-tip="Sidepods. House radiators and cooling. Red Bull's zero-pod concept in 2022 changed the game."/>
+        <!-- Wheels -->
+        <circle cx="65" cy="58" r="12" fill="#222" class="wheel"/>
+        <circle cx="65" cy="58" r="7" fill="#444"/>
+        <circle cx="230" cy="58" r="14" fill="#222" class="wheel"/>
+        <circle cx="230" cy="58" r="8" fill="#444"/>
+        <!-- Floor line -->
+        <line x1="40" y1="55" x2="260" y2="55" stroke="#111" stroke-width="1"/>
+      </svg>
+      <div class="f1-tooltip" id="f1-tooltip"></div>
+    </div>
+  </div>
+
+  <div class="bio">
+    <p>
+      I'm Apurva from Houston, TX. I studied Information Science at the
+      <a href="https://umich.edu">University of Michigan</a>. I'm a Cloud Engineer at
+      <a href="https://aws.amazon.com">Amazon Web Services</a>, where I work on
+      enterprise VPC architecture, WAF, Route 53, and network infrastructure.
+    </p>
+    <p>
+      I love <a href="/projects">building things</a>. Lately that means cloud infrastructure tooling,
+      ML models, and multi-agent systems. I read too much about wine and watch too much F1.
+      Michigan football runs through my blood.
+    </p>
+    <p>
+      When I'm not in front of a terminal, I'm on the slopes, on the course, or finding
+      something new to add to <a href="https://beliapp.com">Beli</a>.
+    </p>
+  </div>
+
+  <h2>Elsewhere</h2>
+  <ul class="elsewhere">
+    <li><a href="https://github.com/ApurvaDesai6">GitHub</a></li>
+    <li><a href="https://linkedin.com/in/-desai-apurva">LinkedIn</a></li>
+    <li><a href="mailto:apurvad@umich.edu">Email</a></li>
+  </ul>
+
+  <h2>Website</h2>
+  <p class="credits">
+    Built with <a href="https://astro.build">Astro</a>. Hosted on AWS (S3 + CloudFront).
+    Source on <a href="https://github.com/ApurvaDesai6/apurva-portfolio">GitHub</a>.
+    Typeset in Fraunces, Source Sans 3 &amp; Crimson Pro.
+  </p>
+</PageLayout>
+
+<script>
+  const tooltip = document.getElementById('f1-tooltip');
+  const container = document.getElementById('f1-car-container');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('mouseenter', (e) => {
+      const tip = el.getAttribute('data-tip');
+      if (!tip || !tooltip || !container) return;
+      tooltip.textContent = tip;
+      tooltip.classList.add('visible');
+      const rect = container.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      tooltip.style.left = (er.left - rect.left) + 'px';
+      tooltip.style.top = (er.top - rect.top - 40) + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+      if (tooltip) tooltip.classList.remove('visible');
+    });
+  });
+</script>
+
+<style>
+  .tagline {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+  }
+  .bio { margin: 2rem 0; }
+  .elsewhere {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  .elsewhere li { margin-bottom: 0.25rem; }
+  .credits {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+const photos = [
+  { src: '/images/polaroids/photo1.webp', caption: 'TODO: skiing photo' },
+  { src: '/images/polaroids/photo2.webp', caption: 'TODO: golf photo' },
+  { src: '/images/polaroids/photo3.webp', caption: 'TODO: F1 or Michigan photo' },
+];
+---
+<div class="polaroid-grid">
+  {photos.map((photo, i) => (
+    <figure class={`polaroid polaroid-${i}`}>
+      <div class="polaroid-placeholder">📷</div>
+      <figcaption>{photo.caption}</figcaption>
+    </figure>
+  ))}
+</div>
+
+<style>
+  .polaroid-grid {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .polaroid {
+    background: white;
+    padding: 8px 8px 36px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.12);
+    max-width: 150px;
+    flex-shrink: 0;
+  }
+  .polaroid-0 { transform: rotate(-2deg); }
+  .polaroid-1 { transform: rotate(1deg); }
+  .polaroid-2 { transform: rotate(-1.5deg); }
+  .polaroid-placeholder {
+    width: 134px;
+    height: 134px;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+  .polaroid img {
+    width: 134px;
+    height: 134px;
+    object-fit: cover;
+  }
+  figcaption {
+    font-size: 0.7rem;
+    text-align: center;
+    margin-top: 6px;
+    color: var(--color-muted);
+  }
+  @media (max-width: 500px) {
+    .polaroid-grid { overflow-x: auto; }
+  }
+</style>

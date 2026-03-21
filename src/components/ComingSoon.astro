@@ -1,0 +1,22 @@
+---
+interface Props {
+  label: string;
+  message?: string;
+}
+const { label, message = 'Coming soon.' } = Astro.props;
+---
+<div class="coming-soon-block">
+  <h1>{label}</h1>
+  <p>{message}</p>
+</div>
+
+<style>
+  .coming-soon-block {
+    opacity: 0.4;
+    padding: 4rem 0;
+  }
+  .coming-soon-block p {
+    color: var(--color-muted);
+    font-style: italic;
+  }
+</style>

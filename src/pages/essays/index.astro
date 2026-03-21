@@ -1,0 +1,79 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allEssays = (await getCollection('essays'))
+  .filter(e => !e.data.draft)
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+const allTags = [...new Set(allEssays.flatMap(e => e.data.tags))].sort();
+---
+<PageLayout title="Essays">
+  <blockquote class="epigraph">
+    <p>"Move fast and break things" is for people who've never been on-call.</p>
+    <cite>— Anon</cite>
+  </blockquote>
+
+  <div class="tag-filters">
+    <a href="/essays" class="tag active">All</a>
+    {allTags.map(tag => (
+      <a href={`/essays?tag=${tag}`} class="tag">{tag}</a>
+    ))}
+  </div>
+
+  <div class="essay-list">
+    {allEssays.map(essay => (
+      <article class="essay-card">
+        <a href={`/essays/${essay.id}`}>
+          <h2>{essay.data.title}</h2>
+        </a>
+        <p class="meta">
+          {essay.data.tags.join(', ')} &nbsp;
+          {essay.data.publishDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase()}
+        </p>
+      </article>
+    ))}
+    {allEssays.length === 0 && <p style="color: var(--color-muted);">No essays yet. Check back soon.</p>}
+  </div>
+
+  <hr />
+  <p style="font-size: 0.85rem; color: var(--color-muted);">
+    Subscribe via <a href="/rss.xml">RSS</a>.
+  </p>
+</PageLayout>
+
+<style>
+  .epigraph {
+    border-left: none;
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin: 0 0 2rem;
+    padding: 0;
+  }
+  .epigraph cite {
+    font-style: normal;
+    font-size: 0.85rem;
+  }
+  .tag-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .essay-card {
+    margin-bottom: 1.5rem;
+  }
+  .essay-card h2 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  .essay-card a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .essay-card a:hover {
+    color: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>When DNS Ate the Cloud · Apurva Desai</title><meta name="description" content="A first-person account of the October 2025 us-east-1 outage. A race condition in DynamoDB's DNS management system took down 70,000+ organizations."><link rel="canonical" href="https://apurvad.xyz/essays/dns-incident/"><link rel="alternate" type="application/rss+xml" title="Apurva Desai" href="/rss.xml"><meta property="og:title" content="When DNS Ate the Cloud · Apurva Desai"><meta property="og:description" content="A first-person account of the October 2025 us-east-1 outage. A race condition in DynamoDB's DNS management system took down 70,000+ organizations."><meta property="og:url" content="https://apurvad.xyz/essays/dns-incident/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/_astro/global.UlV7S3Uj.css">
+<style>.toc[data-astro-cid-xvrfupwn]{font-size:.8rem}.toc-title[data-astro-cid-xvrfupwn]{font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted);margin-bottom:.5rem;font-size:.7rem}.toc[data-astro-cid-xvrfupwn] ul[data-astro-cid-xvrfupwn]{list-style:none;padding:0}.toc[data-astro-cid-xvrfupwn] li[data-astro-cid-xvrfupwn]{margin-bottom:.3rem}.toc[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{color:var(--color-muted);text-decoration:none;transition:color .15s}.toc[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]:hover{color:var(--color-accent)}@media(min-width:1100px){.page-wrapper[data-astro-cid-35i365z7]{grid-template-columns:180px 1fr 180px;max-width:1100px}}.toc-sidebar[data-astro-cid-35i365z7]{display:none}@media(min-width:1100px){.toc-sidebar[data-astro-cid-35i365z7]{display:block;position:sticky;top:3rem;align-self:start}}
+</style></head> <body>  <div class="page-wrapper" data-astro-cid-35i365z7> <aside data-astro-cid-35i365z7> <nav class="site-nav" data-astro-cid-dmqpwcec> <a href="/" class="site-name" data-astro-cid-dmqpwcec>Apurva Desai</a> <ul data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec> <a href="/" class="nav-link" data-astro-cid-dmqpwcec> About </a> </li><li data-astro-cid-dmqpwcec> <a href="/essays" class="nav-link active" data-astro-cid-dmqpwcec> Essays </a> </li><li data-astro-cid-dmqpwcec> <a href="/projects" class="nav-link" data-astro-cid-dmqpwcec> Projects </a> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Books *</span> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Links *</span> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Curriculum *</span> </li> </ul> <p class="nav-footnote" data-astro-cid-dmqpwcec>* Coming soon</p> </nav> </aside> <main class="page-content" data-astro-cid-35i365z7> <article data-astro-cid-35i365z7> <header style="margin-bottom: 2rem;" data-astro-cid-35i365z7> <h1 data-astro-cid-35i365z7>When DNS Ate the Cloud</h1> <h4 style="font-weight: 400; font-style: italic; color: var(--color-muted); margin-top: 0.5rem;" data-astro-cid-35i365z7>A first-person account of the October 2025 us-east-1 outage. A race condition in DynamoDB&#39;s DNS management system took down 70,000+ organizations.</h4> <p class="meta" style="margin-top: 0.75rem;" data-astro-cid-35i365z7>
+PUBLISHED OCT 24, 2025 · <span class="tag" data-astro-cid-35i365z7>AWS</span><span class="tag" data-astro-cid-35i365z7>Engineering</span><span class="tag" data-astro-cid-35i365z7>Incident</span> </p> </header> <div class="essay-content" data-astro-cid-35i365z7>  <p>It was 11:48 PM PDT on October 19th when the first customer calls started coming in. I was on the team that night, and what began as isolated DynamoDB connection errors quickly escalated into something none of us had seen before.</p>
+<p>“My DynamoDB calls are timing out,” the first customer reported. Then another: “EC2 instances won’t launch.” Within minutes: “Lambda functions failing,” “ECS tasks stuck,” “My entire application is down.”</p>
+<p>The pattern that emerged was both subtle and devastating. Everything in us-east-1 that touched DynamoDB was failing, but each service was failing in its own unique way. Customers were seeing their own infrastructure as the problem when the actual failure was completely invisible to them.</p>
+<h2 id="the-root-cause">The Root Cause</h2>
+<p>The failure originated in DynamoDB’s internal automated DNS management system. It was designed with two independent components for high availability:</p>
+<ol>
+<li><strong>DNS Planner</strong> monitors load balancer health and creates DNS update plans</li>
+<li><strong>DNS Enactor</strong> applies DNS changes via Route 53 API calls</li>
+</ol>
+<p>The race condition unfolded in about three minutes:</p>
+<ul>
+<li><strong>11:48 PM</strong> DNS Enactor #1 experiences unusually high delays while processing a routine DNS update plan</li>
+<li><strong>11:49 PM</strong> DNS Planner, unaware of Enactor #1’s delays, continues creating fresh DNS update plans</li>
+<li><strong>11:50 PM</strong> DNS Enactor #2 starts processing the newer plans and runs its cleanup process</li>
+<li><strong>11:51 PM</strong> Enactor #1 finishes its delayed run just as Enactor #2’s cleanup deletes the “stale” plan. This removes ALL IP addresses for DynamoDB’s regional endpoint.</li>
+</ul>
+<p>This wasn’t a Route 53 bug. Route 53 faithfully executed what it was told to do. The bug was in the system that told Route 53 what to do. Once the race condition fired, the system was left in an inconsistent state that prevented any further automated DNS updates.</p>
+<h3 id="why-empty-dns-records-are-catastrophic">Why empty DNS records are catastrophic</h3>
+<p>When a DNS record becomes empty, clients receive NXDOMAIN responses. These get cached for the TTL duration, meaning even after AWS fixed the DNS record, clients that had cached the NXDOMAIN kept failing until their cache expired.</p>
+<h2 id="the-cascade">The Cascade</h2>
+<p>What made this incident particularly devastating wasn’t just the initial DNS failure. It was how that failure cascaded through AWS’s interconnected systems.</p>
+<p><strong>DynamoDB DNS fails</strong> → all internal and external traffic to DynamoDB fails DNS resolution.</p>
+<p><strong>EC2 DropletWorkflow Manager (DWFM)</strong> manages leases for physical servers hosting EC2 instances. It depends on DynamoDB. DNS failures caused DWFM state checks to fail.</p>
+<p><strong>DWFM recovery causes congestive collapse.</strong> After DynamoDB recovered at 2:25 AM, DWFM tried to re-establish leases across the entire EC2 fleet simultaneously. The scale meant leases timed out faster than they could be renewed. This required manual intervention and wasn’t resolved until 5:28 AM.</p>
+<p><strong>Network Manager backlog.</strong> A massive backlog of delayed network configurations meant newly launched EC2 instances had no network config.</p>
+<p><strong>NLB health check flapping.</strong> Instances failed health checks due to network delays, got removed, then passed subsequent checks and got restored. Services behind NLBs became intermittently available.</p>
+<p><strong>Lambda, ECS, EKS, Fargate.</strong> All depend on EC2 instance launches. All impaired.</p>
+<h2 id="what-customers-saw-vs-what-was-actually-happening">What Customers Saw vs. What Was Actually Happening</h2>
+<p>The most challenging aspect of this incident was that customers’ own monitoring showed their infrastructure as the problem:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>What Customers Saw</th><th>Actual Root Cause</th></tr></thead><tbody><tr><td>”My DynamoDB calls are timing out”</td><td>DNS NXDOMAIN responses, no IPs to connect to</td></tr><tr><td>”My EC2 instances won’t launch”</td><td>DWFM congestive collapse preventing lease acquisition</td></tr><tr><td>”My Lambda functions are failing”</td><td>Underlying EC2 capacity unavailable</td></tr><tr><td>”My app is down but EC2 shows running”</td><td>Network config delays and NLB health check flapping</td></tr><tr><td>”I fixed it but it’s still broken”</td><td>DNS negative caching, NXDOMAIN cached until TTL expires</td></tr></tbody></table>
+<p>The hardest part of customer triage was explaining that their infrastructure wasn’t broken. The failure was completely internal to AWS and invisible to their monitoring systems.</p>
+<h2 id="dns-deep-dive">DNS Deep Dive</h2>
+<h3 id="why-dns-is-the-most-dangerous-single-point-of-failure">Why DNS is the most dangerous single point of failure</h3>
+<p>DNS failures are uniquely catastrophic in distributed systems for three reasons:</p>
+<ol>
+<li><strong>Negative caching.</strong> NXDOMAIN responses get cached for the TTL duration. Fixing the root cause doesn’t immediately fix the symptom.</li>
+<li><strong>Universal dependency.</strong> Every network connection starts with DNS resolution.</li>
+<li><strong>Invisible failure mode.</strong> Applications see connection timeouts, not DNS failures. Your monitoring says “connection refused” when the real problem is “couldn’t resolve the hostname.”</li>
+</ol>
+<h3 id="the-thundering-herd-problem-at-aws-scale">The thundering herd problem at AWS scale</h3>
+<p>When DynamoDB recovered, DWFM tried to re-establish leases for the entire EC2 fleet simultaneously. This is a textbook congestive collapse:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Recovery Load > System Capacity</span></span>
+<span class="line"><span>→ Requests timeout faster than they can be processed</span></span>
+<span class="line"><span>→ Clients retry, increasing load further</span></span>
+<span class="line"><span>→ System becomes less available during recovery than during outage</span></span></code></pre>
+<p>The solution is staggered recovery with circuit breakers and exponential backoff. But when the system wasn’t designed for this failure mode, the recovery itself becomes the outage.</p>
+<h3 id="the-cleanup-as-a-weapon-anti-pattern">The “cleanup as a weapon” anti-pattern</h3>
+<p>The cleanup process that deleted “stale” DNS plans was doing the right thing locally but the wrong thing globally. In distributed systems, cleanup operations that can’t be rolled back are dangerous.</p>
+<p>The deeper lesson: independence at the component level doesn’t guarantee independence at the interaction level. The race condition was in the interaction between DNS Planner and DNS Enactor, not in either component individually.</p>
+<h2 id="what-good-dr-looked-like">What Good DR Looked Like</h2>
+<p>During this incident, some customers were completely unaffected. Here’s what worked:</p>
+<ul>
+<li><strong>Multi-region active-active architectures.</strong> No single region dependency.</li>
+<li><strong>DynamoDB Global Tables.</strong> Could fail over reads to other regions.</li>
+<li><strong>Route 53 health checks with failover routing.</strong> Automatically routed to healthy regions.</li>
+<li><strong>ElastiCache in front of DynamoDB.</strong> Cache absorbed reads during the outage.</li>
+<li><strong>Circuit breakers in application code.</strong> Failed fast instead of hanging.</li>
+<li><strong>Hardcoded IPs</strong> (ironically). Some customers with this bad practice actually worked during the DNS failure.</li>
+</ul>
+<p>The value of multi-region architecture isn’t just about AZ failures. It’s about any single-region dependency, including internal AWS dependencies you can’t see.</p>
+<h2 id="what-changed">What Changed</h2>
+<p>AWS’s immediate response was decisive but drastic: disable DynamoDB DNS Planner and DNS Enactor automation worldwide. Switch to manual DNS management until safeguards could be implemented.</p>
+<p>In November 2025, AWS introduced a DNS failover feature. Services can now specify backup DNS records that activate automatically if primary records become empty or invalid. Invariant checking prevents DNS records from ever being set to empty. Staggered recovery mechanisms prevent thundering herd problems.</p>
+<p>The broader lesson: the fix for a race condition in automation isn’t just fixing the race condition. It’s adding invariants that prevent the system from ever reaching an invalid state. You don’t just fix the bug. You make the bug’s consequences impossible.</p>
+<h2 id="personal-takeaways">Personal Takeaways</h2>
+<p>Working customer-facing triage during this incident taught me a few things I won’t forget.</p>
+<p>The hardest incidents are the invisible ones. When customers can see the failure (server down, network partition), they understand what’s happening. When the failure is invisible to them but their applications are broken, trust erodes quickly.</p>
+<p>DNS failures are uniquely bad because they’re cached. Fixing the root cause doesn’t immediately fix the symptom. This creates a secondary wave of confusion when customers’ “fixes” don’t work.</p>
+<p>At AWS scale, recovery is itself a distributed systems problem. The DWFM congestive collapse showed that at sufficient scale, even recovery requires careful orchestration.</p>
+<p>This incident affected 70,000+ organizations and caused hundreds of millions in estimated losses. It also demonstrated the incredible interconnectedness of modern cloud infrastructure. A race condition in a DNS management system became a global business continuity event. That’s both the power and the fragility of the cloud.</p>  </div> </article> <footer class="site-footer" data-astro-cid-sz7xmlte> <hr data-astro-cid-sz7xmlte> <p data-astro-cid-sz7xmlte>Crafted by <a href="mailto:apurvad@umich.edu" data-astro-cid-sz7xmlte>Apurva</a> for <span id="site-age" data-astro-cid-sz7xmlte>-0.03</span> years</p> </footer> <script type="module">const o=new Date("2026-04-01");function t(){const n=((Date.now()-o.getTime())/315576e5).toFixed(2),e=document.getElementById("site-age");e&&(e.textContent=n)}t();setInterval(t,6e4);</script> </main> <aside class="toc-sidebar" data-astro-cid-35i365z7> <nav class="toc" data-astro-cid-xvrfupwn><p class="toc-title" data-astro-cid-xvrfupwn>Contents</p><ul data-astro-cid-xvrfupwn><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-root-cause" data-astro-cid-xvrfupwn>The Root Cause</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-cascade" data-astro-cid-xvrfupwn>The Cascade</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#what-customers-saw-vs-what-was-actually-happening" data-astro-cid-xvrfupwn>What Customers Saw vs. What Was Actually Happening</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#dns-deep-dive" data-astro-cid-xvrfupwn>DNS Deep Dive</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#what-good-dr-looked-like" data-astro-cid-xvrfupwn>What Good DR Looked Like</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#what-changed" data-astro-cid-xvrfupwn>What Changed</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#personal-takeaways" data-astro-cid-xvrfupwn>Personal Takeaways</a></li></ul></nav> </aside> </div>  </body></html>

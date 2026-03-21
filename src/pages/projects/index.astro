@@ -1,0 +1,134 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { projects } from '../../data/projects';
+
+const allTags = [...new Set(projects.flatMap(p => p.tags))].sort();
+---
+<PageLayout title="Projects">
+  <blockquote class="epigraph">
+    <p>"The best way to predict the future is to invent it."</p>
+    <cite>— <a href="https://en.wikipedia.org/wiki/Alan_Kay">Alan Kay</a></cite>
+  </blockquote>
+
+  <div class="tag-filters">
+    <a href="/projects" class="tag active">All</a>
+    {allTags.map(tag => (
+      <a href={`/projects/${tag.toLowerCase()}`} class="tag">{tag}</a>
+    ))}
+  </div>
+
+  <div class="projects-grid">
+    {projects.map(project => (
+      <div class="project-card" data-has-video={project.video ? 'true' : 'false'}>
+        <div class="card-media">
+          {project.image ? (
+            <img src={project.image} alt={project.name} loading="lazy" class="card-thumb" />
+          ) : (
+            <div class="card-placeholder">{project.name.charAt(0)}</div>
+          )}
+          {project.video && (
+            <video src={project.video} loop muted playsinline class="card-video" style="display:none" />
+          )}
+          {project.badge && (
+            <span class={`badge badge-${project.badge.toLowerCase().replace(/\s+/g, '-')}`}>{project.badge}</span>
+          )}
+        </div>
+        <h3>
+          {project.url ? (
+            <a href={project.url}>{project.name}</a>
+          ) : (
+            project.name
+          )}
+        </h3>
+        <p class="project-desc">{project.description}</p>
+        <div class="project-tags">
+          {project.tags.map(t => <span class="tag">{t}</span>)}
+        </div>
+      </div>
+    ))}
+  </div>
+</PageLayout>
+
+<script>
+  document.querySelectorAll('.project-card[data-has-video="true"]').forEach(card => {
+    const img = card.querySelector('.card-thumb') as HTMLImageElement;
+    const video = card.querySelector('.card-video') as HTMLVideoElement;
+    if (!img || !video) return;
+    card.addEventListener('mouseenter', () => {
+      img.style.display = 'none';
+      video.style.display = 'block';
+      video.play();
+    });
+    card.addEventListener('mouseleave', () => {
+      video.pause();
+      video.style.display = 'none';
+      img.style.display = 'block';
+    });
+  });
+</script>
+
+<style>
+  .epigraph {
+    border-left: none;
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin: 0 0 2rem;
+    padding: 0;
+  }
+  .epigraph cite { font-style: normal; font-size: 0.85rem; }
+  .tag-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  .card-media {
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+  .card-media img, .card-media video {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .card-placeholder {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #e8e5e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  .card-media .badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+  .project-card h3 {
+    font-size: 1rem;
+    margin: 0 0 0.25rem;
+  }
+  .project-card h3 a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .project-card h3 a:hover { color: var(--color-accent); }
+  .project-desc {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+  }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+</style>
