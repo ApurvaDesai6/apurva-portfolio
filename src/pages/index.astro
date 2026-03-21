@@ -3,67 +3,73 @@ import PageLayout from '../layouts/PageLayout.astro';
 import PolaroidGrid from '../components/PolaroidGrid.astro';
 ---
 <PageLayout title="About">
-  <p class="tagline">YOU'RE GONNA CARRY THAT WEIGHT</p>
+  <h2 class="greeting">Hi, welcome to my site!</h2>
 
   <PolaroidGrid />
 
-  <div class="f1-section">
-    <div class="f1-car-wrapper" id="f1-car-container" style="position: relative;">
-      <!-- F1 car SVG from svgrepo.com (CC0 public domain) - simplified side view -->
-      <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" class="f1-car" style="width: 100%;">
-        <!-- Body -->
-        <path d="M40,55 L60,55 L70,40 L90,35 L140,32 L160,35 L180,38 L220,42 L250,48 L260,55 L40,55 Z" fill="#CC0000" class="f1-body" data-tip="Monocoque chassis. Carbon fiber survival cell rated to withstand 15G impacts."/>
-        <!-- Nose -->
-        <path d="M20,55 L40,55 L40,50 L25,52 Z" fill="#CC0000" class="f1-nose" data-tip="Nose cone. Crumple zone absorbs energy in frontal impacts. Houses S-duct inlet."/>
-        <!-- Cockpit -->
-        <ellipse cx="145" cy="38" rx="20" ry="8" fill="#1a1a1a" class="f1-cockpit" data-tip="Cockpit. Driver sits in a custom molded seat. Steering wheel costs ~$50,000."/>
-        <!-- Halo -->
-        <path d="M130,35 Q145,28 160,35" stroke="#888" stroke-width="3" fill="none" class="f1-halo" data-tip="Halo device. Titanium. Withstands the weight of a London double-decker bus. Mandatory since 2018."/>
-        <!-- Front wing -->
-        <rect x="10" y="53" width="35" height="3" rx="1" fill="#CC0000" class="f1-front-wing" data-tip="Front wing. Generates ~25% of total downforce. Endplates manage tire wake."/>
-        <!-- Rear wing -->
-        <rect x="245" y="42" width="40" height="4" rx="1" fill="#CC0000" class="f1-rear-wing" data-tip="Rear wing. DRS flap opens here for 12-15 km/h speed boost on straights."/>
-        <rect x="260" y="38" width="4" height="18" rx="1" fill="#1a1a1a"/>
-        <!-- Sidepod -->
-        <path d="M160,40 L200,44 L200,55 L160,55 Z" fill="#990000" class="f1-sidepod" data-tip="Sidepods. House radiators and cooling. Red Bull's zero-pod concept in 2022 changed the game."/>
-        <!-- Wheels -->
-        <circle cx="65" cy="58" r="12" fill="#222" class="wheel"/>
-        <circle cx="65" cy="58" r="7" fill="#444"/>
-        <circle cx="230" cy="58" r="14" fill="#222" class="wheel"/>
-        <circle cx="230" cy="58" r="8" fill="#444"/>
-        <!-- Floor line -->
-        <line x1="40" y1="55" x2="260" y2="55" stroke="#111" stroke-width="1"/>
-      </svg>
-      <div class="f1-tooltip" id="f1-tooltip"></div>
+  <p>
+    I'm Apurva from <strong>Houston, TX</strong>. I studied <strong>information science</strong> at the
+    <a href="https://umich.edu">University of Michigan</a>. I'm a cloud engineer at
+    <a href="https://aws.amazon.com">Amazon Web Services</a> working on enterprise VPC architecture,
+    WAF, Route 53, and network infrastructure.
+  </p>
+
+  <p>
+    Before AWS, I interned at Becht Engineering building analytics dashboards for refining and oilfield
+    clients. At Michigan I led a team that took an IoT medication platform from napkin sketch to
+    <a href="/projects">$15K in funding</a>.
+  </p>
+
+  <p>
+    I just love <a href="/projects">building stuff</a>, whether that's cloud infrastructure tooling,
+    ML models, or multi-agent systems. I read too much about wine and watch too much F1.
+    Michigan football runs through my blood.
+  </p>
+
+  <p>
+    Most days you'll find me skiing, golfing, or finding something new to add to
+    <a href="https://beliapp.com">Beli</a>. There's so much I want to understand and countless
+    problems worth solving. Thanks for stopping by and have fun exploring!
+  </p>
+
+  <div class="f1-tracks">
+    <p class="track-label">Favorite circuits</p>
+    <div class="track-row">
+      <div class="track-item" title="Circuit de Monaco">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M50,15 L75,15 Q85,15 85,25 L85,45 Q85,55 75,55 L60,55 Q50,55 50,65 L50,75 Q50,85 40,85 L25,85 Q15,85 15,75 L15,35 Q15,25 25,25 L35,25 Q45,25 50,15Z"/>
+        </svg>
+        <span>Monaco</span>
+      </div>
+      <div class="track-item" title="Circuit of the Americas">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M20,80 L20,40 L30,20 L50,20 L60,30 L70,25 L80,30 L80,45 L65,50 L55,45 L50,50 L60,60 L75,55 L85,65 L80,80 L60,85 L40,75 L20,80Z"/>
+        </svg>
+        <span>COTA</span>
+      </div>
+      <div class="track-item" title="Suzuka International Racing Course">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M30,85 L15,70 L15,40 Q15,20 35,20 L65,20 Q85,20 85,40 L85,50 L70,55 L55,45 L40,55 L55,65 L70,60 L85,70 L85,80 Q85,90 70,85 L30,85Z"/>
+        </svg>
+        <span>Suzuka</span>
+      </div>
+      <div class="track-item" title="Autodromo Nazionale Monza">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M45,85 L25,70 Q15,60 20,45 L30,30 Q40,15 55,15 L65,20 Q80,25 80,40 L75,55 L65,60 L60,50 L65,40 L55,35 L40,45 L45,60 L55,70 L50,80 L45,85Z"/>
+        </svg>
+        <span>Monza</span>
+      </div>
     </div>
   </div>
 
-  <div class="bio">
-    <p>
-      I'm Apurva from Houston, TX. I studied Information Science at the
-      <a href="https://umich.edu">University of Michigan</a>. I'm a Cloud Engineer at
-      <a href="https://aws.amazon.com">Amazon Web Services</a>, where I work on
-      enterprise VPC architecture, WAF, Route 53, and network infrastructure.
-    </p>
-    <p>
-      I love <a href="/projects">building things</a>. Lately that means cloud infrastructure tooling,
-      ML models, and multi-agent systems. I read too much about wine and watch too much F1.
-      Michigan football runs through my blood.
-    </p>
-    <p>
-      When I'm not in front of a terminal, I'm on the slopes, on the course, or finding
-      something new to add to <a href="https://beliapp.com">Beli</a>.
-    </p>
-  </div>
-
-  <h2>Elsewhere</h2>
+  <h3>Elsewhere</h3>
   <ul class="elsewhere">
     <li><a href="https://github.com/ApurvaDesai6">GitHub</a></li>
     <li><a href="https://linkedin.com/in/-desai-apurva">LinkedIn</a></li>
     <li><a href="mailto:apurvad@umich.edu">Email</a></li>
   </ul>
 
-  <h2>Website</h2>
+  <h3>Website</h3>
   <p class="credits">
     Built with <a href="https://astro.build">Astro</a>. Hosted on AWS (S3 + CloudFront).
     Source on <a href="https://github.com/ApurvaDesai6/apurva-portfolio">GitHub</a>.
@@ -71,38 +77,11 @@ import PolaroidGrid from '../components/PolaroidGrid.astro';
   </p>
 </PageLayout>
 
-<script>
-  const tooltip = document.getElementById('f1-tooltip');
-  const container = document.getElementById('f1-car-container');
-  document.querySelectorAll('[data-tip]').forEach(el => {
-    el.style.cursor = 'pointer';
-    el.addEventListener('mouseenter', (e) => {
-      const tip = el.getAttribute('data-tip');
-      if (!tip || !tooltip || !container) return;
-      tooltip.textContent = tip;
-      tooltip.classList.add('visible');
-      const rect = container.getBoundingClientRect();
-      const er = el.getBoundingClientRect();
-      tooltip.style.left = (er.left - rect.left) + 'px';
-      tooltip.style.top = (er.top - rect.top - 40) + 'px';
-    });
-    el.addEventListener('mouseleave', () => {
-      if (tooltip) tooltip.classList.remove('visible');
-    });
-  });
-</script>
-
 <style>
-  .tagline {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--color-muted);
+  .greeting {
+    font-size: 1.3rem;
     margin-bottom: 1.5rem;
-    opacity: 0.6;
   }
-  .bio { margin: 2rem 0; }
   .elsewhere {
     list-style: none;
     padding: 0;
@@ -112,5 +91,43 @@ import PolaroidGrid from '../components/PolaroidGrid.astro';
   .credits {
     font-size: 0.85rem;
     color: var(--color-muted);
+  }
+  .f1-tracks {
+    margin: 2.5rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .track-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    margin-bottom: 0.75rem;
+  }
+  .track-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .track-item {
+    text-align: center;
+    cursor: default;
+  }
+  .track-item svg {
+    width: 56px;
+    height: 56px;
+    color: var(--color-muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .track-item:hover svg {
+    color: var(--color-accent);
+    transform: scale(1.1);
+  }
+  .track-item span {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    margin-top: 4px;
   }
 </style>
