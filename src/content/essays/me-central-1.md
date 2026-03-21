@@ -5,9 +5,9 @@ publishDate: 2026-03-10
 tags: ["AWS", "Engineering", "Incident", "Disaster Recovery"]
 ---
 
-On March 1st, 2026, I was halfway through my morning coffee when the first alerts started flooding in. What began as routine monitoring quickly escalated into one of the most challenging incidents I've faced as a Cloud Engineer at AWS.
+On March 1st, 2026, the alerts started flooding in across every team at AWS. Iranian retaliatory drone and missile strikes had hit the me-central-1 (UAE/Dubai) data centers. Physical objects struck the facility causing sparks, fire, and complete power loss including backup generators. This wasn't a software failure. It was a physical infrastructure disaster.
 
-Iranian retaliatory drone and missile strikes hit AWS me-central-1 (UAE/Dubai) data centers. Physical objects struck the facility causing sparks, fire, and complete power loss including backup generators. This wasn't a software failure. It was a physical infrastructure disaster.
+While I wasn't on the direct incident response team, the fallout landed squarely on my desk. Customers needed to migrate their VPC configurations, WAF rules, security groups, and networking stacks out of the affected region, and they needed guidance on how to do it fast. I spent the following weeks helping enterprise customers rebuild their network infrastructure in alternate regions and implement failover mechanisms they should have had in place before the event.
 
 ## Timeline
 
@@ -23,9 +23,9 @@ What made this uniquely challenging wasn't just the scale. It was the nature of 
 
 Customers running multi-AZ workloads were not impacted. Single-AZ customers faced total loss unless they had cross-region backups. Multi-AZ architecture isn't optional. It's the difference between "not impacted" and "total loss."
 
-## Technical Triage
+## What I Worked On
 
-The hardest conversations were with customers who had never considered cross-region disaster recovery. I spent the first 48 hours walking through the same decision tree with hundreds of customers.
+My role was focused on the networking and security side of the migration. Customers needed to recreate their VPC architectures, WAF WebACLs, security groups, NACLs, and Route 53 configurations in target regions. Many had complex multi-tier VPC designs with dozens of security group rules, custom WAF rule sets, and intricate routing tables that couldn't just be copy-pasted across regions.
 
 The control plane (AWS APIs, console) was completely unavailable for the affected AZs. The data plane (running EC2 instances, active RDS connections) was also down due to physical infrastructure failure. This meant no API access, no snapshot creation, no emergency backups.
 

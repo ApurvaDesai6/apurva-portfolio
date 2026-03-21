@@ -13,13 +13,12 @@ export const projects: Project[] = [
     name: 'WAF Rule Simulator',
     description: 'Interactive web simulator for testing AWS WAF rules against configurable traffic flows. Export to Terraform or JSON.',
     image: '/images/projects/waf-simulator.webp',
-    video: '/images/projects/waf-simulator.mp4',
     tags: ['AWS', 'Security', 'Engineering'],
     badge: 'AWS Internal',
   },
   {
     name: 'AquaSDG',
-    description: "AI water security analysis using Google's groundsource dataset, FloodHub, and Gemini. Recommends infrastructure investment for UN SDG 6 compliance.",
+    description: "AI water security analysis using Google's Groundsource dataset, FloodHub, and Gemini. Recommends infrastructure investment for UN SDG 6 compliance.",
     image: '/images/projects/aquasdg.webp',
     tags: ['ML', 'AI', 'Climate'],
     badge: 'New',
@@ -40,24 +39,9 @@ export const projects: Project[] = [
     badge: 'New',
   },
   {
-    name: 'DNS Cascade Incident (us-east-1)',
-    description: "Technical case study: how a race condition in DynamoDB's DNS management system cascaded into a multi-hour outage affecting 70,000+ organizations.",
-    image: '/images/projects/dns-incident.webp',
-    url: '/essays/dns-incident',
-    tags: ['AWS', 'Engineering', 'Incident'],
-  },
-  {
-    name: 'me-central-1 Physical Disaster Response',
-    description: 'Incident retrospective on the March 2026 UAE data center failure. Live workload migration, KMS re-encryption, and DR execution under physical infrastructure loss.',
-    image: '/images/projects/me-central-1.webp',
-    url: '/essays/me-central-1',
-    tags: ['AWS', 'Engineering', 'Incident'],
-  },
-  {
     name: 'SmartDose',
-    description: 'IoT medication management platform. React Native + Node.js + DynamoDB. ESP32 hardware. 1 of 10 student projects selected for continued funding.',
+    description: 'IoT medication adherence platform. React Native + Node.js + DynamoDB + ESP32 hardware. $15K funded through EECS 495, selected 1 of 10 out of 50+ proposals.',
     image: '/images/projects/smartdose.webp',
-    url: 'https://github.com/ApurvaDesai6/smartdose',
     tags: ['IoT', 'Engineering'],
   },
   {
@@ -71,7 +55,6 @@ export const projects: Project[] = [
     name: 'apurvad.xyz Infrastructure',
     description: 'Production AWS infrastructure: S3 + CloudFront + ACM + Route 53. Migrated from EC2/ALB/NAT ($59/mo) to static hosting ($2/mo) with full TLS and edge caching.',
     image: '/images/projects/infrastructure.webp',
-    url: '/essays/infra',
     tags: ['AWS', 'Engineering'],
   },
 ];
