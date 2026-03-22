@@ -34,7 +34,7 @@ export const projects: Project[] = [
     name: 'Wine Quality & Price Predictor v2',
     description: 'CatBoost model on 130K reviews achieving 98% rating accuracy. SHAP interpretability, taster bias correction, and interactive UI.',
     image: '/images/projects/wine-predictor-v2.webp',
-    url: 'https://github.com/ApurvaDesai6/wine-predictor',
+    url: 'https://wine.apurvad.xyz',
     tags: ['ML', 'Python'],
     badge: 'New',
   },
