@@ -13,7 +13,7 @@ export const projects: Project[] = [
   {
     name: 'Wine Quality & Price Predictor v2',
     description: 'CatBoost model on 130K reviews achieving 98% rating accuracy. SHAP interpretability, taster bias correction, VLM label scanning, and live price search.',
-    image: '/images/projects/wine-predictor-v2.jpg',
+    image: '/images/projects/wine-predictor.svg',
     url: 'https://wine.apurvad.xyz',
     github: 'https://github.com/ApurvaDesai6/wine-predictor',
     tags: ['ML', 'Python'],
@@ -39,6 +39,8 @@ export const projects: Project[] = [
     name: 'March Madness Agent Swarm',
     description: 'Multi-agent NCAA bracket predictor. Configure swarm size and agent personas. Update simulations in natural language.',
     image: '/images/projects/march-madness.svg',
+    url: 'https://ncaa.apurvad.xyz',
+    github: 'https://github.com/ApurvaDesai6/ncaa-bracket-predictor',
     tags: ['ML', 'AI', 'Sports'],
     badge: 'New',
   },
@@ -47,20 +49,5 @@ export const projects: Project[] = [
     description: 'IoT medication adherence platform. React Native + Node.js + DynamoDB + ESP32 hardware. $15K funded through EECS 495, selected 1 of 10 out of 50+ proposals.',
     image: '/images/projects/smartdose.svg',
     tags: ['IoT', 'Engineering'],
-  },
-  {
-    name: 'AI/ML Governance Framework',
-    description: 'Delivered AI governance recommendations for the City of Prague under OICT. Healthcare predictive analytics and infrastructure management systems.',
-    image: '/images/projects/ai-governance.svg',
-    url: '/essays/ai-governance',
-    tags: ['AI', 'Research'],
-    badge: 'Research',
-  },
-  {
-    name: 'apurvad.xyz Infrastructure',
-    description: 'Production AWS infrastructure: S3 + CloudFront + ACM + Route 53. Migrated from EC2/ALB/NAT ($59/mo) to static hosting ($2/mo) with full TLS and edge caching.',
-    image: '/images/projects/infrastructure.svg',
-    url: '/essays/infra',
-    tags: ['AWS', 'Engineering'],
   },
 ];
