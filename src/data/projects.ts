@@ -24,6 +24,7 @@ export const projects: Project[] = [
     description: 'Interactive web simulator for testing AWS WAF rules against configurable traffic flows. Export to Terraform or JSON.',
     image: '/images/projects/waf-simulator.svg',
     url: 'https://wafsim.apurvad.xyz',
+    github: 'https://github.com/ApurvaDesai6/wafsim',
     tags: ['AWS', 'Security', 'Engineering'],
   },
   {
