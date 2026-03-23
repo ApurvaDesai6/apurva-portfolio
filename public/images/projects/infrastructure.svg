@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#0d1b2a"/>
+  <path d="M160 100 Q160 75 180 75 H220 Q240 75 240 100 Q240 115 225 115 L220 125 L215 115 H180 Q160 115 160 100Z" fill="none" stroke="#ff9f1c" stroke-width="3"/>
+  <circle cx="185" cy="95" r="4" fill="#ff9f1c" opacity="0.6"/>
+  <circle cx="200" cy="95" r="4" fill="#ff9f1c" opacity="0.6"/>
+  <circle cx="215" cy="95" r="4" fill="#ff9f1c" opacity="0.6"/>
+  <text x="200" y="195" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="32" font-weight="700">Infrastructure</text>
+  <text x="200" y="225" text-anchor="middle" fill="#ff9f1c" font-family="system-ui,sans-serif" font-size="14" opacity="0.8">AWS Architecture</text>
+</svg>

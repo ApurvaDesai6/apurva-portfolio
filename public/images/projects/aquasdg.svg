@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#0a2e36"/>
+  <path d="M200 55 Q200 55 220 95 Q240 135 200 135 Q160 135 180 95 Z" fill="#00d4ff" opacity="0.9"/>
+  <ellipse cx="200" cy="135" rx="20" ry="6" fill="#00d4ff" opacity="0.4"/>
+  <text x="200" y="200" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="36" font-weight="700">AquaSDG</text>
+  <text x="200" y="230" text-anchor="middle" fill="#00d4ff" font-family="system-ui,sans-serif" font-size="14" opacity="0.8">Water Security Intelligence</text>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#1a0a2e"/>
+  <circle cx="200" cy="95" r="35" fill="none" stroke="#ff8c00" stroke-width="3"/>
+  <path d="M182 80 Q200 65 218 80 M182 95 Q200 110 218 95" stroke="#ff8c00" stroke-width="2" fill="none"/>
+  <text x="200" y="195" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="32" font-weight="700">March Madness</text>
+  <text x="200" y="225" text-anchor="middle" fill="#ff8c00" font-family="system-ui,sans-serif" font-size="14" opacity="0.8">Agent Swarm</text>
+</svg>

@@ -4,6 +4,7 @@ export interface Project {
   image?: string;
   video?: string;
   url?: string;
+  github?: string;
   tags: string[];
   badge?: string;
 }
@@ -14,40 +15,43 @@ export const projects: Project[] = [
     description: 'CatBoost model on 130K reviews achieving 98% rating accuracy. SHAP interpretability, taster bias correction, VLM label scanning, and live price search.',
     image: '/images/projects/wine-predictor-v2.jpg',
     url: 'https://wine.apurvad.xyz',
+    github: 'https://github.com/ApurvaDesai6/wine-predictor',
     tags: ['ML', 'Python'],
     badge: 'New',
   },
   {
     name: 'WAF Rule Simulator',
     description: 'Interactive web simulator for testing AWS WAF rules against configurable traffic flows. Export to Terraform or JSON.',
-    image: '/images/projects/waf-simulator.webp',
+    image: '/images/projects/waf-simulator.svg',
+    url: 'https://wafsim.apurvad.xyz',
     tags: ['AWS', 'Security', 'Engineering'],
-    badge: 'AWS Internal',
   },
   {
     name: 'AquaSDG',
     description: "AI water security analysis using Google's Groundsource dataset, FloodHub, and Gemini. Recommends infrastructure investment for UN SDG 6 compliance.",
-    image: '/images/projects/aquasdg.webp',
+    image: '/images/projects/aquasdg.svg',
+    url: 'https://aquasdg.apurvad.xyz',
+    github: 'https://github.com/ApurvaDesai6/aquasdg',
     tags: ['ML', 'AI', 'Climate'],
     badge: 'New',
   },
   {
     name: 'March Madness Agent Swarm',
     description: 'Multi-agent NCAA bracket predictor. Configure swarm size and agent personas. Update simulations in natural language.',
-    image: '/images/projects/march-madness.webp',
+    image: '/images/projects/march-madness.svg',
     tags: ['ML', 'AI', 'Sports'],
     badge: 'New',
   },
   {
     name: 'SmartDose',
     description: 'IoT medication adherence platform. React Native + Node.js + DynamoDB + ESP32 hardware. $15K funded through EECS 495, selected 1 of 10 out of 50+ proposals.',
-    image: '/images/projects/smartdose.webp',
+    image: '/images/projects/smartdose.svg',
     tags: ['IoT', 'Engineering'],
   },
   {
     name: 'AI/ML Governance Framework',
     description: 'Delivered AI governance recommendations for the City of Prague under OICT. Healthcare predictive analytics and infrastructure management systems.',
-    image: '/images/projects/ai-governance.webp',
+    image: '/images/projects/ai-governance.svg',
     url: '/essays/ai-governance',
     tags: ['AI', 'Research'],
     badge: 'Research',
@@ -55,7 +59,7 @@ export const projects: Project[] = [
   {
     name: 'apurvad.xyz Infrastructure',
     description: 'Production AWS infrastructure: S3 + CloudFront + ACM + Route 53. Migrated from EC2/ALB/NAT ($59/mo) to static hosting ($2/mo) with full TLS and edge caching.',
-    image: '/images/projects/infrastructure.webp',
+    image: '/images/projects/infrastructure.svg',
     url: '/essays/infra',
     tags: ['AWS', 'Engineering'],
   },

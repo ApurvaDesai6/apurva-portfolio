@@ -1,0 +1,102 @@
+services:
+  # --- AquaSDG DB Init ---
+  aquasdg-db-init:
+    build:
+      context: ./aquasdg-v1
+      dockerfile: ../Dockerfile.generic
+      target: builder
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -f /data/dev.db ] && [ -f prisma/dev.db ]; then
+          cp prisma/dev.db /data/dev.db
+        fi
+        bunx prisma db push --skip-generate
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+    volumes:
+      - aquasdg-data:/data
+
+  # --- WAFSim ---
+  wafsim:
+    build:
+      context: ./wafsim-v1
+      dockerfile: ../Dockerfile.generic
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    restart: unless-stopped
+
+  # --- AquaSDG Next.js ---
+  aquasdg-next:
+    build:
+      context: ./aquasdg-v1
+      dockerfile: ../Dockerfile.generic
+    ports:
+      - "3002:3000"
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    volumes:
+      - aquasdg-data:/data
+    depends_on:
+      aquasdg-db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # --- AquaSDG ML Service ---
+  aquasdg-ml:
+    build:
+      context: ./aquasdg-v1
+      dockerfile: ../Dockerfile.ml
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "file:/data/dev.db"
+    volumes:
+      - aquasdg-data:/data
+    depends_on:
+      aquasdg-db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # --- Wine Predictor ---
+  wine:
+    build:
+      context: ./wine-app-final
+      dockerfile: ../Dockerfile.generic
+    ports:
+      - "3003:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    restart: unless-stopped
+
+  # --- Caddy Reverse Proxy ---
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - wafsim
+      - aquasdg-next
+      - aquasdg-ml
+      - wine
+    restart: unless-stopped
+
+volumes:
+  aquasdg-data:
+  caddy-data:
+  caddy-config:

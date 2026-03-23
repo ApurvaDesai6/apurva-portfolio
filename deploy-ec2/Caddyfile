@@ -1,0 +1,16 @@
+wafsim.apurvad.xyz {
+	reverse_proxy wafsim:3000
+}
+
+aquasdg.apurvad.xyz {
+	handle /api/ml/* {
+		reverse_proxy aquasdg-ml:8000
+	}
+	handle {
+		reverse_proxy aquasdg-next:3000
+	}
+}
+
+wine.apurvad.xyz {
+	reverse_proxy wine:3000
+}
