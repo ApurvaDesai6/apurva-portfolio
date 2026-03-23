@@ -10,6 +10,14 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: 'Wine Quality & Price Predictor v2',
+    description: 'CatBoost model on 130K reviews achieving 98% rating accuracy. SHAP interpretability, taster bias correction, VLM label scanning, and live price search.',
+    image: '/images/projects/wine-predictor-v2.jpg',
+    url: 'https://wine.apurvad.xyz',
+    tags: ['ML', 'Python'],
+    badge: 'New',
+  },
+  {
     name: 'WAF Rule Simulator',
     description: 'Interactive web simulator for testing AWS WAF rules against configurable traffic flows. Export to Terraform or JSON.',
     image: '/images/projects/waf-simulator.webp',
@@ -31,14 +39,6 @@ export const projects: Project[] = [
     badge: 'New',
   },
   {
-    name: 'Wine Quality & Price Predictor v2',
-    description: 'CatBoost model on 130K reviews achieving 98% rating accuracy. SHAP interpretability, taster bias correction, and interactive UI.',
-    image: '/images/projects/wine-predictor-v2.webp',
-    url: 'https://wine.apurvad.xyz',
-    tags: ['ML', 'Python'],
-    badge: 'New',
-  },
-  {
     name: 'SmartDose',
     description: 'IoT medication adherence platform. React Native + Node.js + DynamoDB + ESP32 hardware. $15K funded through EECS 495, selected 1 of 10 out of 50+ proposals.',
     image: '/images/projects/smartdose.webp',
@@ -48,6 +48,7 @@ export const projects: Project[] = [
     name: 'AI/ML Governance Framework',
     description: 'Delivered AI governance recommendations for the City of Prague under OICT. Healthcare predictive analytics and infrastructure management systems.',
     image: '/images/projects/ai-governance.webp',
+    url: '/essays/ai-governance',
     tags: ['AI', 'Research'],
     badge: 'Research',
   },
@@ -55,6 +56,7 @@ export const projects: Project[] = [
     name: 'apurvad.xyz Infrastructure',
     description: 'Production AWS infrastructure: S3 + CloudFront + ACM + Route 53. Migrated from EC2/ALB/NAT ($59/mo) to static hosting ($2/mo) with full TLS and edge caching.',
     image: '/images/projects/infrastructure.webp',
+    url: '/essays/infra',
     tags: ['AWS', 'Engineering'],
   },
 ];

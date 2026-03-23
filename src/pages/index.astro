@@ -6,53 +6,44 @@ import PageLayout from '../layouts/PageLayout.astro';
 
   <div class="polaroid-grid">
     <figure class="polaroid p0">
-      <img src="/images/polaroids/photo1.jpg" alt="Skiing" loading="lazy" />
-      <figcaption>On the slopes</figcaption>
+      <img src="/images/polaroids/photo1.jpg" alt="Skiing off-piste" loading="lazy" />
+      <figcaption>Getting stuck on the off-piste</figcaption>
     </figure>
     <figure class="polaroid p1">
       <img src="/images/polaroids/photo2.jpg" alt="Golf" loading="lazy" />
-      <figcaption>On the course</figcaption>
+      <figcaption>All irons, no driver (work in progress)</figcaption>
     </figure>
     <figure class="polaroid p2">
-      <img src="/images/polaroids/photo3.jpg" alt="F1" loading="lazy" />
-      <figcaption>Race day</figcaption>
+      <img src="/images/polaroids/photo3.jpg" alt="F1 at Imola" loading="lazy" />
+      <figcaption>First live GP, Imola 2024</figcaption>
     </figure>
   </div>
 
   <p>
-    I'm Apurva from <strong>Houston, TX</strong>. I'm a cloud engineer at
-    <a href="https://aws.amazon.com">Amazon Web Services</a> working on enterprise VPC architecture,
-    WAF, Route 53, and network infrastructure. I studied <strong>computer science</strong> at the
-    <a href="https://umich.edu">University of Michigan</a> and before that grew up a bit all over the
-    place, spending about four and a half years living in France and attending the
-    <a href="https://asparis.org">American School of Paris</a> for middle school.
+    Hi! My name is Apurva. I'm currently a cloud engineer at
+    <a href="https://aws.amazon.com">Amazon Web Services</a> in Seattle, WA, working on
+    enterprise network infrastructure, VPC architecture, WAF, and Route 53. I studied
+    <strong>computer science</strong> at the <a href="https://umich.edu">University of Michigan</a>.
   </p>
 
   <p>
-    Living abroad, learning French, and being surrounded by so many different perspectives early on
-    turned me into a global affairs nerd. That carried into debate and Model UN in high school, which
-    became my main thing. When COVID shut down university conferences in 2020, I co-founded
-    <strong>GLOMUN</strong>, one of the first fully online Model UN conferences (250+ attendees,
-    featured on Best Delegate and All American MUN). I later served as Secretary General of North
-    America on <a href="https://www.munimpact.org">MUN Impact</a>'s global leadership team, focused
-    on the UN Sustainable Development Goals.
+    I grew up a bit all over the place. I spent about four and a half years living in France as a kid,
+    attending the <a href="https://asparis.org">American School of Paris</a> for middle school. Being
+    surrounded by so many different cultures and perspectives early on turned me into a global affairs
+    nerd, which carried into debate and Model UN in high school. When COVID shut down university
+    conferences in 2020, I co-founded <strong>GLOMUN</strong>, one of the first fully online Model UN
+    conferences (250+ attendees, featured on Best Delegate and All American MUN). I later served as
+    Secretary General of North America on <a href="https://www.munimpact.org">MUN Impact</a>'s global
+    leadership team, focused on the UN Sustainable Development Goals. That SDG work is actually what
+    inspired me to build <a href="/projects">AquaSDG</a> recently, an AI water security tool I'm
+    continuing to expand.
   </p>
 
   <p>
-    That SDG work is actually what led me to build <a href="/projects">AquaSDG</a> recently, an AI
-    water security tool using Google's Groundsource data that I'm continuing to expand. At Michigan I
-    received $15K in funding through EECS 495 with Prof. Chesney to build
-    <strong>SmartDose</strong>, an IoT medication adherence platform with ESP32 hardware, React Native,
-    and a DynamoDB backend (selected 1 of 10 out of 50+ proposals). These days I'm mostly
-    <a href="/projects">building</a> cloud infrastructure tooling, ML models, and multi-agent systems.
-    My latest project is a <a href="https://wine.apurvad.xyz">wine quality and price predictor</a>
-    trained on 130K reviews.
-  </p>
-
-  <p>
-    Outside of work I watch too much F1, read too much about wine, and Michigan football runs through
-    my blood. Most days you'll find me skiing, golfing, or finding something new to add to
-    <a href="https://beliapp.com">Beli</a>. Thanks for stopping by!
+    Outside of work I'm usually skiing, golfing, watching F1, reading about wine, or finding something
+    new to add to <a href="https://beliapp.com">Beli</a>. Michigan football runs through my blood.
+    I love meeting new people and hearing about what they're working on, so if anything here catches
+    your eye, please don't hesitate to reach out!
   </p>
 
   <div class="f1-tracks">
@@ -113,11 +104,8 @@ import PageLayout from '../layouts/PageLayout.astro';
   .greeting { font-size: 1.3rem; margin-bottom: 1.5rem; }
   .polaroid-grid { display: flex; gap: 1rem; margin: 2rem 0; }
   .polaroid {
-    background: white;
-    padding: 6px 6px 32px;
-    box-shadow: 2px 3px 10px rgba(0,0,0,0.12);
-    max-width: 150px;
-    flex-shrink: 0;
+    background: white; padding: 6px 6px 32px;
+    box-shadow: 2px 3px 10px rgba(0,0,0,0.12); max-width: 150px; flex-shrink: 0;
   }
   .p0 { transform: rotate(-2.5deg); }
   .p1 { transform: rotate(1.5deg); }

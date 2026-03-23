@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Architecting apurvad.xyz: A Systematic Review and Optimization · Apurva Desai</title><meta name="description" content="A full architecture audit of a multi-tier AWS deployment, cost optimization from $59/mo to $2/mo, and the engineering decisions behind each tradeoff."><link rel="canonical" href="https://apurvad.xyz/essays/infra/"><link rel="alternate" type="application/rss+xml" title="Apurva Desai" href="/rss.xml"><meta property="og:title" content="Architecting apurvad.xyz: A Systematic Review and Optimization · Apurva Desai"><meta property="og:description" content="A full architecture audit of a multi-tier AWS deployment, cost optimization from $59/mo to $2/mo, and the engineering decisions behind each tradeoff."><meta property="og:url" content="https://apurvad.xyz/essays/infra/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/_astro/global.UlV7S3Uj.css">
+<style>.toc[data-astro-cid-xvrfupwn]{font-size:.8rem}.toc-title[data-astro-cid-xvrfupwn]{font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted);margin-bottom:.5rem;font-size:.7rem}.toc[data-astro-cid-xvrfupwn] ul[data-astro-cid-xvrfupwn]{list-style:none;padding:0}.toc[data-astro-cid-xvrfupwn] li[data-astro-cid-xvrfupwn]{margin-bottom:.3rem}.toc[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]{color:var(--color-muted);text-decoration:none;transition:color .15s}.toc[data-astro-cid-xvrfupwn] a[data-astro-cid-xvrfupwn]:hover{color:var(--color-accent)}@media(min-width:1100px){.page-wrapper[data-astro-cid-35i365z7]{grid-template-columns:180px 1fr 180px;max-width:1100px}}.toc-sidebar[data-astro-cid-35i365z7]{display:none}@media(min-width:1100px){.toc-sidebar[data-astro-cid-35i365z7]{display:block;position:sticky;top:3rem;align-self:start}}
+</style></head> <body>  <div class="page-wrapper" data-astro-cid-35i365z7> <aside data-astro-cid-35i365z7> <nav class="site-nav" data-astro-cid-dmqpwcec> <a href="/" class="site-name" data-astro-cid-dmqpwcec>Apurva Desai</a> <ul data-astro-cid-dmqpwcec> <li data-astro-cid-dmqpwcec> <a href="/" class="nav-link" data-astro-cid-dmqpwcec> About </a> </li><li data-astro-cid-dmqpwcec> <a href="/essays" class="nav-link active" data-astro-cid-dmqpwcec> Blog </a> </li><li data-astro-cid-dmqpwcec> <a href="/projects" class="nav-link" data-astro-cid-dmqpwcec> Projects </a> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Books *</span> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Links *</span> </li><li data-astro-cid-dmqpwcec> <span class="nav-link coming-soon" data-astro-cid-dmqpwcec>Curriculum *</span> </li> </ul> <p class="nav-footnote" data-astro-cid-dmqpwcec>* Coming soon</p> </nav> </aside> <main class="page-content" data-astro-cid-35i365z7> <article data-astro-cid-35i365z7> <header style="margin-bottom: 2rem;" data-astro-cid-35i365z7> <h1 data-astro-cid-35i365z7>Architecting apurvad.xyz: A Systematic Review and Optimization</h1> <h4 style="font-weight: 400; font-style: italic; color: var(--color-muted); margin-top: 0.5rem;" data-astro-cid-35i365z7>A full architecture audit of a multi-tier AWS deployment, cost optimization from $59/mo to $2/mo, and the engineering decisions behind each tradeoff.</h4> <p class="meta" style="margin-top: 0.75rem;" data-astro-cid-35i365z7>
+PUBLISHED MAR 14, 2026 · <span class="tag" data-astro-cid-35i365z7>AWS</span><span class="tag" data-astro-cid-35i365z7>Engineering</span> </p> </header> <div class="essay-content" data-astro-cid-35i365z7>  <p>I built this site’s infrastructure from scratch on AWS as a hands-on learning lab. Over time it evolved from a deliberately over-engineered multi-tier deployment into a lean, production-optimized static architecture. This post walks through the original design, the audit that identified what needed to change, the optimization process, and the reasoning behind every tradeoff.</p>
+<h2 id="the-original-architecture">The original architecture</h2>
+<p>The initial stack was designed to exercise as many AWS services as possible in a realistic configuration:</p>
+<p><strong>Traffic path:</strong> Client → Route 53 → CloudFront (with ACM TLS termination) → AWS WAF → Application Load Balancer → EC2 (nginx) in a private subnet within a custom VPC.</p>
+<p><strong>Failover path:</strong> CloudFront origin group with primary ALB origin and secondary S3 static bucket for automatic failover if the EC2/ALB path became unhealthy.</p>
+<p><strong>Compute:</strong> Single t2.micro (Amazon Linux 2023) running nginx, managed exclusively through SSM Session Manager. No SSH keys, no port 22 in the security group. IMDSv2 enforced with <code>HttpTokens=required</code> to prevent SSRF-based credential theft via the metadata service.</p>
+<p><strong>Networking:</strong> Custom VPC (<code>vpc-0db4a175a225bcf71</code>) with public and private subnets across two AZs. The EC2 instance sat in a private subnet with no direct internet access. Outbound traffic routed through a NAT Gateway (<code>nat-081f5e98db91ed480</code>) in the public subnet. An Internet Gateway on the public subnet route table served the ALB. Security groups enforced least-privilege: the ALB SG allowed inbound 80/443 from <code>0.0.0.0/0</code>, and the EC2 SG allowed inbound 80 only from the ALB SG. No other inbound paths existed.</p>
+<p><strong>DNS:</strong> Route 53 hosted zone (<code>Z099153621G9JWKOVT92M</code>) with all seven routing policies configured across subdomains as a reference implementation: simple, failover (with health checks), geolocation (US/France/India/China/South Africa/default), latency-based (us-east-1/eu-west-1/ap-southeast-2/ap-south-1), weighted (1% canary / 99% primary), IP-based (CIDR collection for Canada), and geoproximity (with bias controls). The apex domain used a simple A record, while each subdomain demonstrated a different policy.</p>
+<p><strong>Security layers:</strong></p>
+<ol>
+<li>CloudFront + AWS Shield Standard for volumetric DDoS absorption across 450+ edge locations</li>
+<li>AWS WAF WebACL with AWSManagedRulesCommonRuleSet (SQL injection, XSS, path traversal) and rate limiting at 2,000 requests per 5 minutes per IP</li>
+<li>ACM-managed wildcard certificate (<code>*.apurvad.xyz</code>) with TLS 1.2+ enforcement and ECDHE cipher suites for perfect forward secrecy</li>
+<li>VPC network isolation with private subnet placement, NAT Gateway for egress-only internet, and stateful security groups restricting traffic to ALB-to-EC2 on port 80</li>
+<li>EC2 instance hardening: IMDSv2, SSM-only access (no SSH), IAM instance profile with least-privilege policies, automated patch management via Systems Manager</li>
+</ol>
+<p><strong>Observability:</strong> CloudWatch metrics on EC2 (CPU, network), ALB (request count, target response time, healthy host count), and custom alarms with SNS notification for unhealthy targets.</p>
+<p><strong>Monthly cost:</strong> EC2 ~$8, ALB ~$16, NAT Gateway ~$32, Route 53 + CloudFront + S3 ~$3. Total: <strong>~$59/month</strong>.</p>
+<h2 id="the-audit">The audit</h2>
+<p>I approached the audit the same way I’d approach a customer’s architecture review: start with the workload requirements, then evaluate whether each component is justified.</p>
+<p><strong>Workload profile:</strong> Static HTML/CSS/JS portfolio site. No server-side rendering, no database, no user authentication, no dynamic content. Read-heavy, write-never (content changes only on deployment). Traffic: low, bursty (spikes when shared on LinkedIn or in job applications), geographically distributed.</p>
+<p>With that profile established, several components immediately stood out:</p>
+<h3 id="finding-1-nat-gateway-32mo-is-unjustified">Finding 1: NAT Gateway ($32/mo) is unjustified</h3>
+<p>The NAT Gateway existed so the EC2 instance in the private subnet could reach the internet for package updates and SSM connectivity. At $0.045/hour plus data processing charges, it was the single largest line item, accounting for 54% of the total bill.</p>
+<p>For this workload, the private subnet placement was architecturally sound but economically disproportionate. The alternatives:</p>
+<ul>
+<li><strong>Move EC2 to a public subnet with an EIP.</strong> Eliminates the NAT Gateway entirely. The instance gets a public IP for outbound traffic. Security is maintained through security groups (which are stateful and deny all inbound by default) and IMDSv2. The tradeoff is that the instance has a public IP, which increases the attack surface slightly, but with no open inbound ports beyond what the SG allows, the practical risk is minimal.</li>
+<li><strong>Use VPC endpoints for SSM and S3.</strong> Interface endpoints for SSM ($0.01/hr per AZ) and a gateway endpoint for S3 (free) would allow the instance to stay in the private subnet while eliminating the NAT Gateway. Cost: ~$7/mo for SSM endpoints vs $32/mo for NAT. This is the right answer for production workloads where private subnet placement is a compliance requirement.</li>
+<li><strong>Eliminate EC2 entirely.</strong> If the site is static, there’s no compute to run. This is the option I ultimately chose.</li>
+</ul>
+<h3 id="finding-2-alb-16mo-is-over-engineered-for-a-single-target">Finding 2: ALB ($16/mo) is over-engineered for a single target</h3>
+<p>The ALB provided health checking, SSL termination (unused since CloudFront handled TLS), and the ability to add targets for horizontal scaling. For a single EC2 instance serving static files, none of these capabilities were being utilized.</p>
+<p>CloudFront can origin directly to an EC2 instance’s public IP on port 80 using a custom origin. This eliminates the ALB entirely. The tradeoff: you lose ALB health checks and the ability to add instances behind a target group without reconfiguring CloudFront. For a static site, this tradeoff is acceptable. For a dynamic application expecting growth, the ALB would be justified.</p>
+<h3 id="finding-3-route-53-alias-misconfiguration-broke-https">Finding 3: Route 53 ALIAS misconfiguration broke HTTPS</h3>
+<p>During a configuration change, the apex A record was switched from an ALIAS pointing to CloudFront (<code>d278jfa5vguq7o.cloudfront.net</code>) to a simple A record pointing to the EC2 Elastic IP (<code>184.73.104.42</code>). This bypassed CloudFront entirely, which meant:</p>
+<ul>
+<li>TLS termination stopped working (nginx had no certificate configured)</li>
+<li>Browsers with cached HSTS headers from CloudFront’s <code>Strict-Transport-Security</code> response header continued attempting HTTPS connections, which failed</li>
+<li>WAF protections were bypassed</li>
+<li>Edge caching was bypassed</li>
+<li>DDoS protection was reduced to whatever the EC2 instance could absorb</li>
+</ul>
+<p>The fix was a single API call to restore the ALIAS record, but the root cause was deeper: there was no monitoring on the CloudFront distribution’s request count. A CloudWatch alarm on <code>Requests</code> dropping to zero would have caught this immediately.</p>
+<p>Additionally, the CloudFront distribution was using the default <code>*.cloudfront.net</code> certificate instead of the ACM wildcard certificate. The <code>ViewerCertificate</code> configuration had <code>CloudFrontDefaultCertificate: true</code> instead of referencing the ACM ARN. This meant even when traffic flowed through CloudFront, browsers saw a certificate mismatch for <code>apurvad.xyz</code>.</p>
+<h3 id="finding-4-t2micro-burstable-performance-is-a-risk">Finding 4: t2.micro burstable performance is a risk</h3>
+<p>The t2.micro instance type uses CPU credits for burst performance. Under sustained load (which could happen during a deployment, a traffic spike, or if the instance was compromised for crypto mining), CPU credits deplete and performance drops to baseline (10% of a vCPU). The t3.micro offers the same price point with unlimited burst mode available, better baseline performance, and Nitro platform benefits.</p>
+<h3 id="finding-5-no-cicd-pipeline">Finding 5: No CI/CD pipeline</h3>
+<p>Deployments were manual: base64-encode files, push via SSM <code>send-command</code>, reload nginx. This process was error-prone (the base64 encoding had a ~90KB limit per SSM command), slow, and left no audit trail of what was deployed when. There was no version control on the site content itself.</p>
+<h2 id="the-optimized-architecture">The optimized architecture</h2>
+<p>Based on the audit, I migrated to a fundamentally different architecture that matches the workload:</p>
+<p><strong>New traffic path:</strong> Client → Route 53 (ALIAS) → CloudFront → S3</p>
+<p><strong>What changed:</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Component</th><th>Before</th><th>After</th><th>Savings</th></tr></thead><tbody><tr><td>Compute</td><td>EC2 t2.micro (nginx)</td><td>None (S3 serves objects)</td><td>$8/mo</td></tr><tr><td>Load balancing</td><td>ALB with target group</td><td>None (CloudFront origins to S3)</td><td>$16/mo</td></tr><tr><td>Networking</td><td>NAT Gateway + private subnet</td><td>None (S3 is a regional service)</td><td>$32/mo</td></tr><tr><td>CDN</td><td>CloudFront → ALB</td><td>CloudFront → S3 with OAC</td><td>$0</td></tr><tr><td>TLS</td><td>ACM cert (was misconfigured)</td><td>ACM cert (properly attached, SNI, TLS 1.2+)</td><td>$0</td></tr><tr><td>Deployment</td><td>Manual SSM commands</td><td>GitHub Actions → <code>aws s3 sync</code> → CF invalidation</td><td>$0</td></tr><tr><td><strong>Total</strong></td><td><strong>~$59/mo</strong></td><td><strong>~$2/mo</strong></td><td><strong>$57/mo (97%)</strong></td></tr></tbody></table>
+<p><strong>S3 configuration:</strong> Bucket <code>apurvad-xyz-static</code> with all public access blocked. Access is exclusively through CloudFront using an Origin Access Control (OAC), which is the successor to Origin Access Identity (OAI). The bucket policy allows <code>s3:GetObject</code> only when the request comes from the specific CloudFront distribution ARN.</p>
+<p><strong>CloudFront configuration:</strong></p>
+<ul>
+<li>Origin: S3 bucket with OAC (sigv4 signing)</li>
+<li>Default root object: <code>index.html</code></li>
+<li>Viewer protocol policy: redirect-to-https</li>
+<li>Cache policy: <code>CachingOptimized</code> (managed policy) with 86400s default TTL for static assets</li>
+<li>Price class: <code>PriceClass_100</code> (US, Canada, Europe) to minimize cost while covering the primary audience</li>
+<li>HTTP/2 and HTTP/3 enabled</li>
+<li>Custom error responses: 403 and 404 map to <code>/index.html</code> with 200 status (for client-side routing)</li>
+<li>CloudFront Function on viewer-request to append <code>/index.html</code> to directory paths (required because S3 doesn’t serve index documents for subdirectory requests through CloudFront OAC)</li>
+</ul>
+<p><strong>CI/CD pipeline:</strong> GitHub Actions workflow triggers on push to <code>main</code>. Steps: checkout → Node.js setup → <code>npm ci</code> → <code>npm run build</code> (Astro static site generator) → <code>aws s3 sync ./dist s3://apurvad-xyz-static --delete</code> → <code>aws cloudfront create-invalidation --paths "/*"</code>. The IAM user for GitHub Actions has a minimal inline policy: <code>s3:PutObject</code>, <code>s3:DeleteObject</code>, <code>s3:ListBucket</code>, <code>s3:GetObject</code> on the bucket, and <code>cloudfront:CreateInvalidation</code> on the distribution. No other permissions.</p>
+<p><strong>Resilience:</strong> S3 provides 99.999999999% (11 nines) durability and 99.99% availability. CloudFront adds edge caching across 450+ locations with automatic failover between edge locations. The architecture has no single points of failure that I control. The previous architecture had the EC2 instance as a single point of failure (single AZ, single instance, no auto-scaling group).</p>
+<h2 id="scaling-analysis">Scaling analysis</h2>
+<p>The current architecture handles the portfolio workload well, but it’s worth thinking through how the design would change at different scales:</p>
+<p><strong>10x traffic (~10K requests/day):</strong> No changes needed. S3 + CloudFront scales automatically. CloudFront cache hit ratio would improve with more traffic, actually reducing origin requests. Cost increase: negligible (maybe $3-4/mo total).</p>
+<p><strong>100x traffic with dynamic content:</strong> This is where the architecture would need to evolve. Options:</p>
+<ul>
+<li><strong>Lambda@Edge or CloudFront Functions</strong> for lightweight dynamic behavior (A/B testing, personalization, auth)</li>
+<li><strong>API Gateway + Lambda</strong> for serverless API endpoints</li>
+<li><strong>ECS Fargate behind ALB</strong> if the application needs persistent server-side state or WebSocket connections</li>
+<li><strong>DynamoDB</strong> for any data persistence needs</li>
+</ul>
+<p>The key principle: start static, add dynamic capabilities only when the workload demands them. Every component you add is a component you have to monitor, secure, patch, and pay for.</p>
+<p><strong>Multi-region with high availability:</strong> CloudFront already provides global edge distribution. For origin redundancy, S3 Cross-Region Replication to a secondary bucket with CloudFront origin failover would provide sub-minute RTO with zero data loss. Route 53 health checks on the CloudFront distribution would handle DNS-level failover if needed, though CloudFront’s built-in origin failover is typically sufficient.</p>
+<h2 id="the-wine-app-a-different-workload-a-different-architecture">The wine app: a different workload, a different architecture</h2>
+<p>The wine predictor app (<code>wine.apurvad.xyz</code>) runs on the same EC2 instance (now upgraded to t3.small for the 2GB RAM needed by Next.js). It’s a server-side Next.js application with API routes that call external AI services for wine label analysis and price search. This workload genuinely needs a server, so the EC2 instance is justified here.</p>
+<p>The wine app’s traffic path is different: Route 53 → EC2 directly (A record to EIP), with Let’s Encrypt providing TLS via certbot on nginx. I initially routed it through a separate CloudFront distribution, but discovered that CloudFront blocks POST request bodies larger than ~8KB in certain configurations. Since the label scanning feature sends base64-encoded images in POST bodies (50-150KB), CloudFront was returning 403s. Bypassing CloudFront and terminating TLS at nginx with Let’s Encrypt solved this cleanly.</p>
+<p>This is a good example of matching architecture to workload requirements. The portfolio site benefits from CloudFront’s caching and global distribution. The wine app needs to accept large POST bodies and maintain server-side state, so direct-to-EC2 with Let’s Encrypt is the right call.</p>
+<h2 id="lessons-learned">Lessons learned</h2>
+<p><strong>Cost optimization starts with understanding the workload.</strong> The original $59/mo architecture wasn’t wrong, it was mismatched. Every component was correctly configured and secure. But the workload didn’t need most of them. The audit framework is simple: for each component, ask “what happens if I remove this?” If the answer is “nothing changes for the user,” it’s a candidate for removal.</p>
+<p><strong>Defense in depth is still the right model, even for static sites.</strong> The optimized architecture still has multiple security layers: CloudFront TLS termination, OAC-restricted S3 access (no public bucket), minimal IAM permissions for CI/CD, and HTTPS enforcement. The layers are just different from the original.</p>
+<p><strong>ALIAS records and CloudFront certificate configuration are easy to get wrong.</strong> The HTTPS breakage from the Route 53 misconfiguration was invisible to basic monitoring. The lesson: monitor the full request path, not just individual components. A synthetic canary that hits <code>https://apurvad.xyz</code> and checks for a 200 with a valid certificate would have caught both the DNS and certificate issues.</p>
+<p><strong>CloudFront Functions are essential for static sites on S3.</strong> Without the URL rewrite function, every directory path returns a 403. This is the single most common gotcha when migrating from nginx/Apache to S3 + CloudFront, and it’s not obvious until you click a link and get an XML error page.</p>
+<p><strong>CI/CD changes the economics of deployment.</strong> Manual deployments via SSM were slow and error-prone. GitHub Actions made deployments a <code>git push</code>. The time saved per deployment is small, but the reduction in deployment friction means I actually deploy more often, which means the site stays current. The best architecture is the one you can confidently ship changes to.</p>  </div> </article> <footer class="site-footer" data-astro-cid-sz7xmlte> <hr data-astro-cid-sz7xmlte> <p data-astro-cid-sz7xmlte>Crafted by <a href="mailto:apurvad@umich.edu" data-astro-cid-sz7xmlte>Apurva</a> for <span id="site-age" data-astro-cid-sz7xmlte>-0.02</span> years</p> </footer> <script type="module">const o=new Date("2026-04-01");function t(){const n=((Date.now()-o.getTime())/315576e5).toFixed(2),e=document.getElementById("site-age");e&&(e.textContent=n)}t();setInterval(t,6e4);</script> </main> <aside class="toc-sidebar" data-astro-cid-35i365z7> <nav class="toc" data-astro-cid-xvrfupwn><p class="toc-title" data-astro-cid-xvrfupwn>Contents</p><ul data-astro-cid-xvrfupwn><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-original-architecture" data-astro-cid-xvrfupwn>The original architecture</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-audit" data-astro-cid-xvrfupwn>The audit</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-optimized-architecture" data-astro-cid-xvrfupwn>The optimized architecture</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#scaling-analysis" data-astro-cid-xvrfupwn>Scaling analysis</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#the-wine-app-a-different-workload-a-different-architecture" data-astro-cid-xvrfupwn>The wine app: a different workload, a different architecture</a></li><li style="padding-left: 0.75rem;" data-astro-cid-xvrfupwn><a href="#lessons-learned" data-astro-cid-xvrfupwn>Lessons learned</a></li></ul></nav> </aside> </div>  </body></html>
